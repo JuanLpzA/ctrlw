@@ -6,6 +6,9 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import javax.swing.JDesktopPane;
 import javax.swing.JLayeredPane;
+import Vista.InterAnalisisDatos;
+import java.awt.Container;
+
 
 /**
  *
@@ -76,6 +79,8 @@ public class FrmMenu extends javax.swing.JFrame {
         jMenu5 = new javax.swing.JMenu();
         jMenuItem_nueva_venta = new javax.swing.JMenuItem();
         jMenuItem_gestionar_ventas = new javax.swing.JMenuItem();
+        jMenu6 = new javax.swing.JMenu();
+        btnAnalisis = new javax.swing.JMenuItem();
         jMenu8 = new javax.swing.JMenu();
         jMenuItem_cerrar_sesion = new javax.swing.JMenuItem();
 
@@ -242,6 +247,18 @@ public class FrmMenu extends javax.swing.JFrame {
 
         jMenuBar1.add(jMenu5);
 
+        jMenu6.setText("NUEVO");
+
+        btnAnalisis.setText("btnAnalisis");
+        btnAnalisis.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAnalisisActionPerformed(evt);
+            }
+        });
+        jMenu6.add(btnAnalisis);
+
+        jMenuBar1.add(jMenu6);
+
         jMenu8.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jMenu8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/cerrar-sesion.png"))); // NOI18N
         jMenu8.setText("Cerrar Sesion");
@@ -345,6 +362,29 @@ public class FrmMenu extends javax.swing.JFrame {
         interGestionarVentas.setVisible(true);
     }//GEN-LAST:event_jMenuItem_gestionar_ventasActionPerformed
 
+    private void btnAnalisisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAnalisisActionPerformed
+        // TODO add your handling code here:
+         InterAnalisisDatos interAnalisis = new InterAnalisisDatos();
+    // Obtener el contenedor principal (JDesktopPane) desde el componente actual
+    Container container = this.getParent();
+    while (!(container instanceof JDesktopPane) && container != null) {
+        container = container.getParent();
+    }
+    
+    if (container instanceof JDesktopPane) {
+        JDesktopPane desktopPane = (JDesktopPane) container;
+        desktopPane.add(interAnalisis);
+        interAnalisis.setVisible(true);
+        
+        try {
+            interAnalisis.setSelected(true);
+        } catch (java.beans.PropertyVetoException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+        
+    }//GEN-LAST:event_btnAnalisisActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -381,6 +421,7 @@ public class FrmMenu extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem btnAnalisis;
     private javax.swing.JLabel fondomenu;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private javax.swing.JMenu jMenu1;
@@ -388,6 +429,7 @@ public class FrmMenu extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenu jMenu4;
     private javax.swing.JMenu jMenu5;
+    private javax.swing.JMenu jMenu6;
     private javax.swing.JMenu jMenu8;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem_actualizar_stock;
