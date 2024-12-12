@@ -6,7 +6,7 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import javax.swing.JDesktopPane;
 import javax.swing.JLayeredPane;
-import Vista.InterAnalisisDatos;
+import vista.InterAnalisisDatos;
 import java.awt.Container;
 
 

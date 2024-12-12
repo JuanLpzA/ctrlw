@@ -1,148 +1,112 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JInternalFrame.java to edit this template
- */
-package Vista;
+package vista;
 
-import Controlador.Ctrl_Analisis;
-import Modelo.Venta;
+import controlador.Ctrl_Analisis;
+import java.util.List;
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
-import java.util.ArrayList;
-import javax.swing.table.DefaultTableModel;
+import java.awt.event.*;
+import modelo.Venta;
 
 public class InterAnalisisDatos extends JInternalFrame {
-    private JTable tablaVentas;
-    private DefaultTableModel modelo;
-    private Ctrl_Analisis controlador;
+    private final Ctrl_Analisis controlador;
+    private final JTextArea areaResultados;
     private List<Venta> listaVentas;
     
     public InterAnalisisDatos() {
-        this.setTitle("Análisis de Ventas");
-        this.setSize(800, 600);
-        this.setClosable(true);
-        this.setIconifiable(true);
-        this.setMaximizable(true);
-        
+        super("Análisis de Datos", true, true, true, true);
         controlador = new Ctrl_Analisis();
-        listaVentas = new ArrayList<>();
-        inicializarComponentes();
-        cargarDatos();
-    }
-    
-    private void inicializarComponentes() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
         
-        JPanel panelBotones = new JPanel();
-        panelBotones.setLayout(new FlowLayout());
+        // Configuración del frame
+        setSize(600, 400);
+        setLayout(new BorderLayout(10, 10));
         
-        JButton btnOrdenarTotal = new JButton("Ordenar por Total (QuickSort)");
-        panelBotones.add(btnOrdenarTotal);
+        // Panel superior para botones
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        JButton btnCargarDatos = new JButton("Cargar Datos");
+        JButton btnOrdenar = new JButton("Ordenar por Valor");
+        JButton btnBuscar = new JButton("Buscar por Valor");
         
-        String[] columnas = {"ID", "Total", "Fecha"};
-        modelo = new DefaultTableModel(columnas, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
+        panelBotones.add(btnCargarDatos);
+        panelBotones.add(btnOrdenar);
+        panelBotones.add(btnBuscar);
         
-        tablaVentas = new JTable(modelo);
-        JScrollPane scrollPane = new JScrollPane(tablaVentas);
+        // Área de resultados
+        areaResultados = new JTextArea();
+        areaResultados.setEditable(false);
+        areaResultados.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        JScrollPane scrollPane = new JScrollPane(areaResultados);
         
-        panel.add(panelBotones, BorderLayout.NORTH);
-        panel.add(scrollPane, BorderLayout.CENTER);
+        // Agregar componentes al frame
+        add(panelBotones, BorderLayout.NORTH);
+        add(scrollPane, BorderLayout.CENTER);
         
-        btnOrdenarTotal.addActionListener(e -> ordenarPorTotal());
+        // Eventos
+        btnCargarDatos.addActionListener(e -> cargarDatos());
+        btnOrdenar.addActionListener(e -> ordenarDatos());
+        btnBuscar.addActionListener(e -> buscarVenta());
         
-        this.add(panel);
+        setVisible(true);
     }
     
     private void cargarDatos() {
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         try {
-            modelo.setRowCount(0);
+            System.out.println("Iniciando carga de datos...");
             listaVentas = controlador.obtenerVentasParaAnalisis();
             
-            if (listaVentas != null) {
-                for (Venta venta : listaVentas) {
-                    modelo.addRow(new Object[]{
-                        venta.getIdVenta(),
-                        venta.getTotal(),
-                        venta.getFecha()
-                    });
-                }
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, 
-                "Error al cargar datos: " + e.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
-        }
-    }
-    
-    private void ordenarPorTotal() {
-        try {
             if (listaVentas != null && !listaVentas.isEmpty()) {
-                controlador.quickSortVentas(listaVentas, 0, listaVentas.size() - 1);
-                actualizarTabla();
-                JOptionPane.showMessageDialog(this, 
-                    "Datos ordenados por total usando QuickSort\n" +
-                    "Este algoritmo tiene una complejidad de O(n log n) en promedio",
-                    "Ordenamiento Completado",
-                    JOptionPane.INFORMATION_MESSAGE);
+                mostrarDatos("Datos de Ventas Cargados:", listaVentas);
             } else {
-                JOptionPane.showMessageDialog(this,
-                    "No hay datos para ordenar",
-                    "Aviso",
-                    JOptionPane.WARNING_MESSAGE);
+                areaResultados.setText("No se encontraron datos para mostrar");
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
-                "Error al ordenar datos: " + e.getMessage(),
+                "Error al cargar los datos: " + e.getMessage(),
                 "Error",
                 JOptionPane.ERROR_MESSAGE);
+        } finally {
+            setCursor(Cursor.getDefaultCursor());
         }
     }
     
-    private void actualizarTabla() {
-        modelo.setRowCount(0);
-        for (Venta venta : listaVentas) {
-            modelo.addRow(new Object[]{
-                venta.getIdVenta(),
-                venta.getTotal(),
-                venta.getFecha()
-            });
+    private void ordenarDatos() {
+        if (listaVentas == null || listaVentas.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay datos para ordenar");
+            return;
+        }
+        
+        controlador.quickSortVentas(listaVentas, 0, listaVentas.size() - 1);
+        mostrarDatos("Datos Ordenados por Valor:", listaVentas);
+    }
+    
+    private void buscarVenta() {
+        if (listaVentas == null || listaVentas.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay datos para buscar");
+            return;
+        }
+        
+        String input = JOptionPane.showInputDialog(this, "Ingrese el valor a buscar:");
+        if (input != null && !input.trim().isEmpty()) {
+            try {
+                double valorBuscado = Double.parseDouble(input);
+                Venta ventaEncontrada = controlador.busquedaBinariaVenta(listaVentas, valorBuscado);
+                
+                if (ventaEncontrada != null) {
+                    areaResultados.setText("Venta encontrada:\n" + ventaEncontrada.toString());
+                } else {
+                    areaResultados.setText("No se encontró una venta con ese valor");
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Por favor ingrese un número válido");
+            }
         }
     }
-
-
-
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 394, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 274, Short.MAX_VALUE)
-        );
-
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
-
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    // End of variables declaration//GEN-END:variables
+    
+    private void mostrarDatos(String titulo, List<Venta> ventas) {
+        StringBuilder sb = new StringBuilder(titulo + "\n\n");
+        for (Venta venta : ventas) {
+            sb.append(venta.toString()).append("\n");
+        }
+        areaResultados.setText(sb.toString());
+    }
 }

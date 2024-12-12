@@ -1,61 +1,72 @@
-package Controlador;
+package controlador;
 
-import conexion.Conexion;
-import Modelo.Venta;
 import java.util.ArrayList;
 import java.util.List;
+import modelo.Venta;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import javax.swing.JOptionPane;
+import conexion.Conexion;
 
 public class Ctrl_Analisis {
-    private Connection conexion;
     
-    public Ctrl_Analisis() {
-        try {
-            conexion = Conexion.getConnection();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error al conectar: " + e.getMessage());
-        }
-    }
-    
-    public List<Venta> obtenerVentasParaAnalisis() throws SQLException {
-        List<Venta> ventas = new ArrayList<>();
-        String sql = "SELECT idventa, total, fecha FROM tb_venta";
+    public List<Venta> obtenerVentasParaAnalisis() {
+        List<Venta> listaVentas = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         
-        try (PreparedStatement pst = conexion.prepareStatement(sql);
-             ResultSet rs = pst.executeQuery()) {
-            
-            while (rs.next()) {
-                Venta venta = new Venta();
-                venta.setIdVenta(rs.getInt("idventa"));
-                venta.setTotal(rs.getDouble("total"));
-                venta.setFecha(rs.getString("fecha"));
-                ventas.add(venta);
+        try {
+            conn = Conexion.conectar();
+            if (conn != null) {
+                String sql = "SELECT idCabeceraVenta, idCliente, valorPagar, fechaVenta, estado " +
+                           "FROM tb_cabecera_venta " +
+                           "WHERE estado = 1";
+                           
+                System.out.println("Ejecutando consulta: " + sql);
+                
+                ps = conn.prepareStatement(sql);
+                rs = ps.executeQuery();
+                
+                while (rs.next()) {
+                    Venta venta = new Venta();
+                    venta.setIdCabeceraVenta(rs.getInt("idCabeceraVenta"));
+                    venta.setIdCliente(rs.getInt("idCliente"));
+                    venta.setValorPagar(rs.getDouble("valorPagar"));
+                    venta.setFechaVenta(rs.getDate("fechaVenta"));
+                    venta.setEstado(rs.getInt("estado"));
+                    listaVentas.add(venta);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error al cargar los datos: " + e.toString());
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (conn != null) conn.close();
+            } catch (Exception e) {
+                System.out.println("Error al cerrar recursos: " + e.toString());
             }
         }
-        return ventas;
+        return listaVentas;
     }
     
     public void quickSortVentas(List<Venta> ventas, int inicio, int fin) {
-        if (ventas == null || ventas.isEmpty()) {
-            return;
-        }
         if (inicio < fin) {
-            int pivotIndex = particionQuickSort(ventas, inicio, fin);
-            quickSortVentas(ventas, inicio, pivotIndex - 1);
-            quickSortVentas(ventas, pivotIndex + 1, fin);
+            int particion = particionQuickSort(ventas, inicio, fin);
+            quickSortVentas(ventas, inicio, particion - 1);
+            quickSortVentas(ventas, particion + 1, fin);
         }
     }
     
     private int particionQuickSort(List<Venta> ventas, int inicio, int fin) {
-        double pivot = ventas.get(fin).getTotal();
+        Venta pivote = ventas.get(fin);
         int i = inicio - 1;
         
         for (int j = inicio; j < fin; j++) {
-            if (ventas.get(j).getTotal() <= pivot) {
+            if (ventas.get(j).getValorPagar() <= pivote.getValorPagar()) {
                 i++;
                 Venta temp = ventas.get(i);
                 ventas.set(i, ventas.get(j));
@@ -68,5 +79,26 @@ public class Ctrl_Analisis {
         ventas.set(fin, temp);
         
         return i + 1;
+    }
+    
+    public Venta busquedaBinariaVenta(List<Venta> ventas, double valorBuscado) {
+        int izquierda = 0;
+        int derecha = ventas.size() - 1;
+        
+        while (izquierda <= derecha) {
+            int medio = (izquierda + derecha) / 2;
+            double valorActual = ventas.get(medio).getValorPagar();
+            
+            if (Math.abs(valorActual - valorBuscado) < 0.001) {
+                return ventas.get(medio);
+            }
+            
+            if (valorActual < valorBuscado) {
+                izquierda = medio + 1;
+            } else {
+                derecha = medio - 1;
+            }
+        }
+        return null;
     }
 }

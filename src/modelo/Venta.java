@@ -1,40 +1,62 @@
-package Modelo;
+package modelo;
+
+import java.util.Date;
 
 public class Venta {
-    private int idVenta;
-    private double total;
-    private String fecha;
+    private int idCabeceraVenta;
+    private int idCliente;
+    private double valorPagar;
+    private Date fechaVenta;
+    private int estado;
     
     public Venta() {
     }
     
-    public Venta(int idVenta, double total, String fecha) {
-        this.idVenta = idVenta;
-        this.total = total;
-        this.fecha = fecha;
+    public int getIdCabeceraVenta() {
+        return idCabeceraVenta;
     }
     
-    public int getIdVenta() {
-        return idVenta;
+    public void setIdCabeceraVenta(int idCabeceraVenta) {
+        this.idCabeceraVenta = idCabeceraVenta;
     }
     
-    public void setIdVenta(int idVenta) {
-        this.idVenta = idVenta;
+    public int getIdCliente() {
+        return idCliente;
     }
     
-    public double getTotal() {
-        return total;
+    public void setIdCliente(int idCliente) {
+        this.idCliente = idCliente;
     }
     
-    public void setTotal(double total) {
-        this.total = total;
+    public double getValorPagar() {
+        return valorPagar;
     }
     
-    public String getFecha() {
-        return fecha;
+    public void setValorPagar(double valorPagar) {
+        this.valorPagar = valorPagar;
     }
     
-    public void setFecha(String fecha) {
-        this.fecha = fecha;
+    public Date getFechaVenta() {
+        return fechaVenta;
+    }
+    
+    public void setFechaVenta(Date fechaVenta) {
+        this.fechaVenta = fechaVenta;
+    }
+    
+    public int getEstado() {
+        return estado;
+    }
+    
+    public void setEstado(int estado) {
+        this.estado = estado;
+    }
+    
+    @Override
+    public String toString() {
+        return "Venta #" + idCabeceraVenta + 
+               " | Cliente: " + idCliente + 
+               " | Valor: $" + String.format("%.2f", valorPagar) + 
+               " | Fecha: " + fechaVenta;
     }
 }
